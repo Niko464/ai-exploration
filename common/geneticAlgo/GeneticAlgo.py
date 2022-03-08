@@ -1,6 +1,7 @@
 import sys
 from abc import ABC, abstractmethod
-from portable.geneticAlgo.FitnessFunc import *
+from . import FitnessFunc
+from . import Member
 
 class GeneticAlgo(ABC):
     def __init__(       self,

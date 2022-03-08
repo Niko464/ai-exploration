@@ -1,4 +1,4 @@
-from portable.geneticAlgo.Member import *
+from . import Member
 from abc import ABC, abstractmethod
 
 class FitnessFunc(ABC):

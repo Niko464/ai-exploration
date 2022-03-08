@@ -1,8 +1,8 @@
-from portable.graphical.GameLogic import *
 import pygame
-from Point import *
 import datetime
 
+from common.graphical.GameLogic import *
+from common.other.Point import *
 
 
 class SalesDroneGraphical(GameLogic):

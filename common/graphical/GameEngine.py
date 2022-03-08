@@ -1,5 +1,5 @@
 import pygame
-from portable.graphical.GameLogic import *
+from . import GameLogic
 
 """
 This is the Engine for the Graphical part of the project

@@ -1,16 +1,21 @@
-from specific.SalesDroneGraphical import *
-from portable.graphical.GameEngine import *
 from random import shuffle
 import pickle
 import math
 from threading import Thread
-from portable.ai.Member import *
-from portable.ai.FitnessFunc import *
 import time
 import random
 from copy import *
-from Point import *
 import sys
+import os
+
+p = os.path.abspath("..")
+sys.path.append(p)
+
+from common.other.Point import *
+from common.geneticAlgo.FitnessFunc import *
+from common.geneticAlgo.Member import *
+from common.graphical.GameEngine import *
+from src.SalesDroneGraphical import *
 
 def getDistance(a: Point, b: Point):
 	return math.pow(a.x - b.x, 2) + math.pow(a.y - b.y, 2)
@@ -26,6 +31,9 @@ class SaleDroneMember(Member):
 		super().__init__()
 		self.data = listCities
 		self.cityInfos = cityInfos
+
+	def clone(self):
+		pass
 
         
 class SaleDroneFitnessFunc(FitnessFunc):
@@ -130,7 +138,7 @@ class SalesDroneAlgo:
 #TODO: optimization, calculate all distances once, then use a lookup table
 #TODO: optimization, use "simulated annealing"
 def main():
-	saveFile = "saves/map15"
+	saveFile = "saves/map9"
 	cityInfos = loadObject(saveFile)
 	graphicalDisplayLogic = SalesDroneGraphical(cityInfos)
 
