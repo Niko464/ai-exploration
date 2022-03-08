@@ -10,8 +10,8 @@ from common.other.Point import *
 
 
 def main():
-	saveFile = "saves/map9"
-	amtCities = 9
+	saveFile = "saves/map20"
+	amtCities = 20
 	cities = [Point(random.randint(5, 495), random.randint(5, 495)) for i in range(amtCities)]
 	with open(saveFile, 'wb') as handle:
 		pickle.dump(cities, handle)

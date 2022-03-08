@@ -3,24 +3,28 @@ from abc import ABC, abstractmethod
 from . import FitnessFunc
 from . import Member
 
+"""
+TODO: find a way to interact with environment
+"""
 class GeneticAlgo(ABC):
     def __init__(       self,
                         populationSize: int,
                         fitnessFunc: FitnessFunc,
-                        mutationProb: float
+                        mutationProb: float,
+                        shouldCrossOver: bool,
+                        amtRandomMembersPerGen: int,
                 ):
-        self.population = []
-        self.createRandomPopulation()
+        self.population = [self._createRandomMember() for _ in range(populationSize)]
         self.fitnessObj = fitnessFunc
         self.popSize = populationSize
         self.mutationProb = mutationProb
         self.recordFitness = -sys.maxsize - 1
-    
-    def __crossover(self, memberA: Member, memberB: Member):
-        pass
-    
-    def __mutation(self, memberA: Member):
-        pass
+        #This is the amount of members that will have totally random genes
+        self.amtRandomMembersPerGen = amtRandomMembersPerGen
+        self.shouldCrossOver = shouldCrossOver
+
+        if self.popSize <= self.amtRandomMembersPerGen:
+            raise ValueError("amtRandomMembersPerGen can't be lower or the same as popSize")
 
     #This should be called in a loop to train the AI
     def trainOneGeneration(self):
@@ -32,15 +36,24 @@ class GeneticAlgo(ABC):
         #Check if the best member is a new record
         if (self.population[0].fitness > self.recordFitness):
             self.recordFitness = self.population[0].fitness
-            #TODO: do something with this info
-            print(f"TODO | new fitnessRecord: {self.recordFitness}")
+            self._foundNewFitnessRecord(self.population[0])
         #Generate the member's picking probabilities
         self.__generatePickingProbabilities()
         #Perform Crossover and mutation
-        nextGeneration = []
-        for _ in range(self.popSize):
-            #TODO
-            pass
+        nextGeneration = [self._createRandomMember() for _ in range(self.amtRandomMembersPerGen)]
+        #TODO: the best parents can be lost with this system
+        for _ in range(self.popSize - self.amtRandomMembersPerGen):
+            parentAIndex = self.__pickAMemberIndex()
+            #Next is done so that the two parent's can't be the same
+            self.population[parentAIndex].pickingProb = 0.0
+            parentBIndex = self.__pickAMemberIndex()
+            child = None
+            if (self.shouldCrossOver):
+                child = self.population[parentAIndex].crossover(self.population[parentBIndex])
+            else:
+                child = self.population[parentAIndex].clone()
+            child.mutate()
+            nextGeneration.append(child)
         #Set the new population
         self.population = nextGeneration
 
@@ -64,5 +77,10 @@ class GeneticAlgo(ABC):
 
     #This should be overriden by children classes in specific projects
     @abstractmethod
-    def createRandomPopulation():
+    def _createRandomMember(self):
+        pass
+
+    #Called when a member exceeded the current fitnessRecord
+    @abstractmethod
+    def _foundNewFitnessRecord(self, member):
         pass

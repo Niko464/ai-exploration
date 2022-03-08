@@ -35,6 +35,15 @@ class SaleDroneMember(Member):
 	def clone(self):
 		pass
 
+	def crossover(self):
+		pass
+
+	def mutate(self):
+		pass
+
+	def randomize(self):
+		pass
+
         
 class SaleDroneFitnessFunc(FitnessFunc):
 	def __init__(self):
@@ -138,7 +147,7 @@ class SalesDroneAlgo:
 #TODO: optimization, calculate all distances once, then use a lookup table
 #TODO: optimization, use "simulated annealing"
 def main():
-	saveFile = "saves/map9"
+	saveFile = "saves/map20"
 	cityInfos = loadObject(saveFile)
 	graphicalDisplayLogic = SalesDroneGraphical(cityInfos)
 

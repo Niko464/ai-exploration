@@ -63,6 +63,7 @@ class Player:
 	def computeTick(self, aiOutput, tickIndex):
 		if self.isAlive == False or self.didFinish == True:
 			return False
+		
 		aiAngle = self._unNormalizeAngle0To360(aiOutput[0])
 		thrust = min(100, self._unNormalizeThrust(aiOutput[1]))
 		print(f"player Input AKA aiOutput \tthrust: {thrust} aiAngle: {aiAngle}")
@@ -70,6 +71,14 @@ class Player:
 		#Update looking Vector to make calcs for the rotation part of the game
 		self._updateLookingVector()
 		self._updateRotation(tickIndex)
+		
+		"""
+		thrust = 100
+		self.targetPos.x = self.cpList[self.nextCheckpointId].x
+		self.targetPos.y = self.cpList[self.nextCheckpointId].y
+		self._updateLookingVector()
+		self._updateRotation(tickIndex)
+		"""
 		#Update Looking vector for the graphic game representation
 		self._updateLookingVector()
 		self._updateVelocityVector(thrust)
