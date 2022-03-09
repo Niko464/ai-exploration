@@ -44,7 +44,7 @@ class GameEngineV2(ABC):
 				pygame.quit()
 				return False
 			self.eventCallback(event)
-		if (self.updateCallback.update(self.screen) == False):
+		if (self.updateCallback(self.screen) == False):
 			pygame.quit()
 			return False
 		pygame.display.update()

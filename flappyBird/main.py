@@ -1,21 +1,26 @@
+import os
+import sys
 
 p = os.path.abspath("..")
 sys.path.append(p)
 
 from common.geneticAlgo.GeneticAlgo import *
 from src.FlappyEnvironment import *
+from src.GeneticFlappy import *
 
-"""
-THREE parts have to work together: Environment, the Genetic Algo, the display of a game
-- make all ais interact with env in a loop
-- when game is finished, 
 
-#TODO: set seed for flappy map to train on
-"""
 def main():
-	print("hi")
-	genAlgo = GeneticAlgo()
-	env = FlappyEnvironment(2)
+	popSize = 1
+	genAlgo = GeneticFlappy()
+	env = FlappyEnvironment(popSize)
+
+	env.reset(shouldRender=True)
+	done = False
+	#TODO: change
+	aiOutputs = [[0] for _ in range(popSize)]
+	while not done:
+		observations, rewards, done, _ = env.step(aiOutputs)
+
 
 if __name__ == "__main__":
 	main()
