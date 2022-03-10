@@ -37,6 +37,7 @@ class FlappyEnvironment:
 		startX = 150
 		startY = self.screenSizeY / 2
 		self.birds = [Bird(startX, startY, self.screenSizeX, self.screenSizeY, self.pipeSpeed) for _ in range(self.amtAgents)]
+		return [bird.getObservation(pipes) for bird in self.birds]
 
 	# gets executed every game tick
 	def step(self, aiInputs):

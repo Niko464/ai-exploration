@@ -7,13 +7,12 @@ from . import Member
 TODO: find a way to interact with environment
 """
 class GeneticAlgo(ABC):
-    def __init__(       self,
-                        populationSize: int,
-                        fitnessFunc: FitnessFunc,
-                        mutationProb: float,
-                        shouldCrossOver: bool,
-                        amtRandomMembersPerGen: int,
-                ):
+    def __init__(self,
+        populationSize: int,
+        mutationProb: float,
+        shouldCrossOver: bool,
+        amtRandomMembersPerGen: int,
+        fitnessFunc: FitnessFunc = None):
         self.population = [self._createRandomMember() for _ in range(populationSize)]
         self.fitnessObj = fitnessFunc
         self.popSize = populationSize
@@ -28,9 +27,11 @@ class GeneticAlgo(ABC):
 
     #This should be called in a loop to train the AI
     def trainOneGeneration(self):
+        self._interactWithEnvironment()
         #Calc Fitness for the population
-        for member in self.population:
-            member.fitness = self.fitnessObj.fitness(member)
+        if (self.fitnessObj != None):
+            for member in self.population:
+                member.fitness = self.fitnessObj.fitness(member)
         #Order them by fitness
         self.population.sort(key=lambda member: member.fitness, reverse=True)
         #Check if the best member is a new record
@@ -83,4 +84,8 @@ class GeneticAlgo(ABC):
     #Called when a member exceeded the current fitnessRecord
     @abstractmethod
     def _foundNewFitnessRecord(self, member):
+        pass
+
+    @abstractmethod
+    def _interactWithEnvironment(self):
         pass

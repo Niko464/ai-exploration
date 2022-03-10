@@ -8,11 +8,9 @@ class LayerDense:
 		self.amtNeurons = amtNeurons
 		self.weights = []
 		self.biases = []
-		#print("Init LayerDense")
-		#print(f"\tweights: {self.weights}\n\tbiases: {self.biases}")
 
 	def forward(self, inputs):
-		self.output = np.dot(inputs, self.weights) * self.biases
+		self.output = np.dot(inputs, self.weights) + self.biases
 
 	def getWeights(self):
 		return self.weights
@@ -26,6 +24,7 @@ class LayerDense:
 	def setBiases(self, newBiases):
 		self.biases = newBiases
 
+	#TODO: self.biases is hard coded as a single array, it doesn't accept batches
 	def randomize(self):
 		self.weights = 0.3 * np.random.randn(self.amtInputs, self.amtNeurons)
 		self.biases = np.array([np.array([np.random.random() for _ in range(self.amtNeurons)])])#np.zeros((1, amtNeurons))

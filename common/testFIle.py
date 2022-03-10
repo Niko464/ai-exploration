@@ -34,12 +34,6 @@ def main():
 	output = myNN.forward(np.array([.1, .1, .1, .1]))
 	print(output)
 	"""
-	geneA = Genes(np.random.uniform(low=0.0, high=10.0, size=(10)))
-	geneB = Genes(np.random.uniform(low=0.0, high=10.0, size=(10)))
-	child = geneA.crossover(geneB)
-	print(geneA)
-	print(geneB)
-	print(child)
 
 if __name__ == "__main__":
 	main()

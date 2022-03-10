@@ -40,18 +40,21 @@ class Bird:
 		self.__checkCollisions(pipes)
 		if (self.isAlive):
 			self.ticksAlive += 1
-		pipe = self.getClosestPipe(pipes)
 
+		
+		return (self.getObservation(pipes), self.ticksAlive)
+
+	def getObservation(self, pipes):
+		pipe = self.__getClosestPipe(pipes)
 		# 'Normalized' values for the AI to use
 		distX = (pipe.x - self.pos.x) / (self.screenSizeX)
 		distTopY = (self.pos.y - pipe.topY) / (self.screenSizeY)
 		distBottomY = (self.pos.y - pipe.bottomY) / (self.screenSizeY)
 		velYNorm = self.velY / 25
-		print(f"obs: {distX} {distTopY} {distBottomY} {velYNorm}")
-		return ([], self.ticksAlive)
+		return [distX, distTopY, distBottomY, velYNorm]
 
 	# gets closest pipe in front of the bird
-	def getClosestPipe(self, pipes):
+	def __getClosestPipe(self, pipes):
 		record = sys.maxsize
 		bestPipe = None
 		for pipe in pipes:
