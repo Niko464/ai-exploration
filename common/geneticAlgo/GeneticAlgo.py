@@ -1,4 +1,6 @@
 import sys
+import random
+
 from abc import ABC, abstractmethod
 from . import FitnessFunc
 from . import Member
@@ -12,6 +14,7 @@ class GeneticAlgo(ABC):
         mutationProb: float,
         shouldCrossOver: bool,
         amtRandomMembersPerGen: int,
+        showEvery: int,
         fitnessFunc: FitnessFunc = None):
         self.population = [self._createRandomMember() for _ in range(populationSize)]
         self.fitnessObj = fitnessFunc
@@ -21,6 +24,8 @@ class GeneticAlgo(ABC):
         #This is the amount of members that will have totally random genes
         self.amtRandomMembersPerGen = amtRandomMembersPerGen
         self.shouldCrossOver = shouldCrossOver
+        self.currGen = 1
+        self.showEvery = showEvery
 
         if self.popSize <= self.amtRandomMembersPerGen:
             raise ValueError("amtRandomMembersPerGen can't be lower or the same as popSize")
@@ -38,25 +43,27 @@ class GeneticAlgo(ABC):
         if (self.population[0].fitness > self.recordFitness):
             self.recordFitness = self.population[0].fitness
             self._foundNewFitnessRecord(self.population[0])
-        #Generate the member's picking probabilities
-        self.__generatePickingProbabilities()
         #Perform Crossover and mutation
         nextGeneration = [self._createRandomMember() for _ in range(self.amtRandomMembersPerGen)]
         #TODO: the best parents can be lost with this system
         for _ in range(self.popSize - self.amtRandomMembersPerGen):
+            #Generate the member's picking probabilities
+            self.__generatePickingProbabilities()
             parentAIndex = self.__pickAMemberIndex()
             #Next is done so that the two parent's can't be the same
-            self.population[parentAIndex].pickingProb = 0.0
+            oldFitness = self.population[parentAIndex].fitness
+            self.population[parentAIndex].fitness = 0.0
+            self.__generatePickingProbabilities()
+            self.population[parentAIndex].fitness = oldFitness
             parentBIndex = self.__pickAMemberIndex()
-            child = None
+            child = self.population[parentAIndex].clone()
             if (self.shouldCrossOver):
-                child = self.population[parentAIndex].crossover(self.population[parentBIndex])
-            else:
-                child = self.population[parentAIndex].clone()
+                self.population[parentAIndex].crossover(self.population[parentBIndex])
             child.mutate()
             nextGeneration.append(child)
         #Set the new population
         self.population = nextGeneration
+        self.currGen += 1
 
     def __generatePickingProbabilities(self):
         total = 0

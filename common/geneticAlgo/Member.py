@@ -3,8 +3,6 @@ from copy import deepcopy
 import numpy as np
 from abc import ABC, abstractmethod
 
-from . import Genes
-
 """
 NOTES:
 Genes shouldn't be used, because the mutate function, the crossover function are problem dependant so it's a useless

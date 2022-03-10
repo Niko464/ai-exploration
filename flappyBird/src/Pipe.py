@@ -19,8 +19,5 @@ class Pipe:
 
 	def _reSpawn(self, currentSpacing):
 		self.x = self.respawnPos
-		for i in range(10):
-			print(f"{random.randint(self.offset, self.screenSizeY - currentSpacing - self.offset)}")
 		self.topY = random.randint(self.offset, self.screenSizeY - currentSpacing - self.offset)
 		self.bottomY = self.topY + currentSpacing
-		print(f"{self.topY} {self.bottomY} {currentSpacing}")

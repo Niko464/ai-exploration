@@ -1,58 +1,87 @@
 import numpy as np
+import random
+import pickle
+
 from . LayerDense import *
 from . ActivationFuncs import *
-from common.geneticAlgo.Genes import *
 
 class NeuralNetwork:
 	def __init__(self):
 		self.layers = []
 		self.activationFuncs = []
-		self.finishedSetup = False
+		self.totalParams = 0
 
 	def addLayer(self, amtInputs:int, amtNeurons: int, activationFunc: ActivationFunc):
 		newLayer = LayerDense(amtInputs, amtNeurons)
 		newLayer.randomize()
 		self.layers.append(newLayer)
 		self.activationFuncs.append(activationFunc)
+		self.totalParams += newLayer.amtParams
 
-	def finishSetup(self):
-		startingData = np.array([])
+	def randomize(self):
 		for layer in self.layers:
-			#This is because we accept "batches"
-			for weights in layer.getWeights():
-				startingData = np.concatenate([startingData, weights])
-			for biases in layer.getBiases():
-				startingData = np.concatenate([startingData, biases])
-		self.genes = Genes(startingData)
-		print(f"finishedSetup: {startingData}")
+			layer.randomize()
 
-	def loadGenes(self):
-		currIndex = 0
-		for layer in self.layers:
-			totalWeightsList = np.array([])
-			totalBiasesList = np.array([])
-			for i in range(layer.amtInputs):
-				weightsList = np.array([])
-				for j in range(layer.amtNeurons):
-					weightsList.append(self.genes.data[currIndex])
-					currIndex += 1
-				totalWeightsList.append(weightsList)
+	#Modifies this object to take certain values of the otherNN
+	def crossover(self, otherNN):
+		otherBrain = otherNN.getBrain()
+		for layerIndex, layerData in enumerate(otherBrain):
+			for weightsIndex, weights in enumerate(layerData[0]):
+				for weightIndex, weight in enumerate(weights):
+					#50% chance
+					if (np.random.random() > 0.5):
+						self.layers[layerIndex].weights[weightsIndex][weightIndex] = weight
+			for biasesIndex, biases in enumerate(layerData[1]):
+				for biasIndex, bias in enumerate(biases):
+					if (np.random.random() > 0.5):
+						self.layers[layerIndex].biases[biasesIndex][biasIndex] = bias
 
-			for i in range(layer.amtNeurons):
-				biasList = np.array([])
-				for j in range(layer.amtNeurons):
-					biasList.append(self.genes.data[currIndex])
-					currIndex += 1
-				totalBiasesList.append(biasList)
 
-			layer.setWeights(totalWeightsList)
-			layer.setBiases(totalBiasesList)
-		print("totalWeightsList")
-		print(totalWeightsList)
-		print("totalBiasesList")
-		print(totalBiasesList)
-
-			
+	def mutate(self):
+		rand = random.randint(0, self.totalParams - 1)
+		currCounter = 0
+		mutated = False
+		currLayerIndex = 0
+		while mutated == False:
+			layer = self.layers[currLayerIndex]
+			if currCounter + layer.amtParams < rand:
+				currLayerIndex += 1
+				currCounter += layer.amtParams
+				continue
+			weightsList = layer.getWeights()
+			currWeightsIndex = 0
+			while mutated == False and currWeightsIndex < len(weightsList):
+				weights = weightsList[currWeightsIndex]
+				if currCounter + layer.amtNeurons <= rand:
+					currWeightsIndex += 1
+					currCounter += layer.amtNeurons 
+					continue
+				else:
+					"""
+					print(f"should mutate in weights here {currLayerIndex} {currWeightsIndex}")
+					print(f"index that we should mutate: {rand - currCounter}")
+					print(f"val: {weights[rand - currCounter]}")
+					"""
+					weights[rand - currCounter] = np.random.uniform(low=-1.0, high=1.0)
+					mutated = True
+					break
+			biasesList = layer.getBiases()
+			currBiasesIndex = 0
+			while (mutated == False and currBiasesIndex < len(biasesList)):
+				biases = biasesList[currBiasesIndex]
+				if (currCounter + layer.amtNeurons <= rand):
+					currBiasesIndex += 1
+					currCounter += layer.amtNeurons
+					continue
+				else:
+					"""
+					print(f"should mutate in biases here {currLayerIndex} {currBiasesIndex}")
+					print(f"index that we should mutate: {rand - currCounter}")
+					print(f"val: {biases[rand - currCounter]}")
+					"""
+					biases[rand - currCounter] = np.random.uniform(low=0.0, high=1.0)
+					mutated = True
+					break
 
 
 	def printNetwork(self):
@@ -62,7 +91,7 @@ class NeuralNetwork:
 			print(layer.getWeights())
 			print("biases")
 			print(layer.getBiases())
-			print("\n\n")
+		print("\n")
 
 
 	# returns all weights and biases
@@ -83,9 +112,6 @@ class NeuralNetwork:
 			pickle.dump(self.getBrain(), handle)
 
 	def forward(self, inputs):
-		if (finishedSetup == False):
-			print("You didn't call finishSetup()")
-			return
 		currInput = inputs
 		for index, layer in enumerate(self.layers):
 			layer.forward(currInput)

@@ -12,12 +12,15 @@ class FlappyEnvironment:
 		self.amtAgents = amtAgents
 		self.shouldRender = False
 		self.ticks = 0
+		self.gameStatePlay = True
+
+		self.reset(False)
+
+	def reset(self, shouldRender: bool):
 		self.gameSummary = {
 			"static": {},
 			"dynamic": []
 		}
-		self.gameStatePlay = True
-
 		self.screenSizeY = 450
 		self.screenSizeX = 900
 		self.pipeSpeed = 8
@@ -30,14 +33,14 @@ class FlappyEnvironment:
 		pipeSpacingX = (self.screenSizeX + 60) / amtPipes
 		for i in range(3):
 			self.pipes.append(Pipe(self.screenSizeX + 50, self.screenSizeX + 50 + i * pipeSpacingX , self.pipeSpeed, self.screenSizeY, self.currentPipeSpacing))
-
-	def reset(self, shouldRender: bool):
 		self.shouldRender = shouldRender
+
 		self.ticks = 0
 		startX = 150
 		startY = self.screenSizeY / 2
-		self.birds = [Bird(startX, startY, self.screenSizeX, self.screenSizeY, self.pipeSpeed) for _ in range(self.amtAgents)]
-		return [bird.getObservation(pipes) for bird in self.birds]
+		self.birds = [Bird(index, startX, startY, self.screenSizeX, self.screenSizeY, self.pipeSpeed) for index in range(self.amtAgents)]
+		print(f"birdsLEN {len(self.birds)}")
+		return [bird.getObservation(self.pipes) for bird in self.birds]
 
 	# gets executed every game tick
 	def step(self, aiInputs):
@@ -97,6 +100,7 @@ class FlappyEnvironment:
 		self.gameStateIndexCounterInterval = 1000 / self.amtGameStatesPerSec
 		self.lastTimeIncreasedGameStateIndex = datetime.datetime.now()
 
+		self.fontSmall = pygame.font.Font(None, 20)
 		self.fontMedium = pygame.font.Font(None, 30)
 
 	def __renderUpdate(self, screen):
@@ -110,6 +114,10 @@ class FlappyEnvironment:
 	def _renderBirds(self, screen):
 		for bird in self.gameSummary["dynamic"][self.currentGameStateIndex]["birds"]:
 			pygame.draw.circle(screen, bird.aliveColor if bird.isAlive else bird.deadColor, (bird.pos.x, bird.pos.y), bird.radius, 3)
+			txtToRender = str(bird.ID)
+			txtWidth, txtHeight = self.fontSmall.size(txtToRender)
+			txtSurface = self.fontSmall.render(txtToRender, False, "Black")
+			screen.blit(txtSurface, (bird.pos.x - txtWidth / 2, bird.pos.y - txtHeight / 2))
 
 	def _renderPipes(self, screen):
 		for pipe in self.gameSummary["dynamic"][self.currentGameStateIndex]["pipes"]:

@@ -7,30 +7,32 @@ sys.path.append(p)
 from common.geneticAlgo.GeneticAlgo import *
 from src.FlappyEnvironment import *
 from src.GeneticFlappy import *
-
+ 
 from src.MemberFlappy import *
-
+ 
 
 def main():
-	popSize = 1
-	genAlgo = GeneticFlappy()
-	#env = FlappyEnvironment(popSize)
+	popSize = 100
+	genAlgo = GeneticFlappy(popSize=popSize)
 
-
-	done = False
-	#TODO: change
-	aiOutputs = [[0] for _ in range(popSize)]
-	for generation in range(5):
-		#env.reset(shouldRender=True)
-		#while not done:
-		#	observations, rewards, done, _ = env.step(aiOutputs)
+	for generation in range(100):
 		genAlgo.trainOneGeneration()
 
-
+"""
 def test():
 	mem = MemberFlappy()
-	mem.mutate()
-	mem.neuralNetwork.loadGenes()
+	other = mem.clone()
+	other.randomize()
+	print("Network Mem")
+	mem.neuralNetwork.printNetwork()
+	print("Network other")
+	other.neuralNetwork.printNetwork()
+
+	child = mem.clone()
+	child.crossover(other)
+	print("Child")
+	child.neuralNetwork.printNetwork()
+"""
 
 if __name__ == "__main__":
-	test()
+	main()

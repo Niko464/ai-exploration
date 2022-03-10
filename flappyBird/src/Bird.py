@@ -7,7 +7,8 @@ def constrain(val, minVal, maxVal):
 	return min(maxVal, max(minVal, val))
 
 class Bird:
-	def __init__(self, startPosX, startPosY, screenSizeX, screenSizeY, velX):
+	def __init__(self, ID, startPosX, startPosY, screenSizeX, screenSizeY, velX):
+		self.ID = ID
 		self.gravity = 6
 		self.screenSizeX = screenSizeX
 		self.screenSizeY = screenSizeY
@@ -23,12 +24,10 @@ class Bird:
 		self.ticksAlive = 0
 
 	def update(self, tick, actions, pipes):
-		#if (actions[0] > 0.5):
-		#	self.jump()
 		self.velY += self.gravity
 		self.velY = constrain(self.velY, -1000, 25 if self.isAlive else 40)
 
-		if (tick % 8 == 0):
+		if (actions[0] > 0.5):
 			self.__jump()
 
 		if (self.isOnGround == False):
