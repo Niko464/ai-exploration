@@ -9,7 +9,7 @@ class MemberFlappy(Member):
 		super().__init__()
 		self.neuralNetwork = NeuralNetwork()
 		self.relu = ActivationRelu()
-		self.neuralNetwork.addLayer(4, 6, self.relu)
+		self.neuralNetwork.addLayer(5, 6, self.relu)
 		self.neuralNetwork.addLayer(6, 1, self.relu)
 		self.randomize()
 

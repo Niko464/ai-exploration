@@ -39,7 +39,6 @@ class FlappyEnvironment:
 		startX = 150
 		startY = self.screenSizeY / 2
 		self.birds = [Bird(index, startX, startY, self.screenSizeX, self.screenSizeY, self.pipeSpeed) for index in range(self.amtAgents)]
-		print(f"birdsLEN {len(self.birds)}")
 		return [bird.getObservation(self.pipes) for bird in self.birds]
 
 	# gets executed every game tick
@@ -103,6 +102,8 @@ class FlappyEnvironment:
 		self.fontSmall = pygame.font.Font(None, 20)
 		self.fontMedium = pygame.font.Font(None, 30)
 
+		self.lenGameState = len(self.gameSummary["dynamic"])
+
 	def __renderUpdate(self, screen):
 		screen.fill((255, 255, 255))
 		self._renderBirds(screen)
@@ -126,7 +127,7 @@ class FlappyEnvironment:
 
 	def _renderHUD(self, screen):
 		startHud = (20, 430)
-		txtToRender = "GameTick: " + str(self.currentGameStateIndex)
+		txtToRender = "GameTick: " + str(self.currentGameStateIndex) + " / " + str(self.lenGameState)
 		txtWidth, txtHeight = self.fontMedium.size(txtToRender)
 		txtSurface = self.fontMedium.render(txtToRender, False, "Black")
 		screen.blit(txtSurface, (startHud[0], startHud[1] - txtHeight))

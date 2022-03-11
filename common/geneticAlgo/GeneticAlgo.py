@@ -5,9 +5,7 @@ from abc import ABC, abstractmethod
 from . import FitnessFunc
 from . import Member
 
-"""
-TODO: find a way to interact with environment
-"""
+
 class GeneticAlgo(ABC):
     def __init__(self,
         populationSize: int,
@@ -15,6 +13,7 @@ class GeneticAlgo(ABC):
         shouldCrossOver: bool,
         amtRandomMembersPerGen: int,
         showEvery: int,
+        statsEvery: int,
         fitnessFunc: FitnessFunc = None):
         self.population = [self._createRandomMember() for _ in range(populationSize)]
         self.fitnessObj = fitnessFunc
@@ -26,6 +25,7 @@ class GeneticAlgo(ABC):
         self.shouldCrossOver = shouldCrossOver
         self.currGen = 1
         self.showEvery = showEvery
+        self.statsEvery = statsEvery
 
         if self.popSize <= self.amtRandomMembersPerGen:
             raise ValueError("amtRandomMembersPerGen can't be lower or the same as popSize")
@@ -45,8 +45,9 @@ class GeneticAlgo(ABC):
             self._foundNewFitnessRecord(self.population[0])
         #Perform Crossover and mutation
         nextGeneration = [self._createRandomMember() for _ in range(self.amtRandomMembersPerGen)]
+        nextGeneration.append(self.population[0])
         #TODO: the best parents can be lost with this system
-        for _ in range(self.popSize - self.amtRandomMembersPerGen):
+        for _ in range(self.popSize - self.amtRandomMembersPerGen - 1):
             #Generate the member's picking probabilities
             self.__generatePickingProbabilities()
             parentAIndex = self.__pickAMemberIndex()
@@ -59,7 +60,8 @@ class GeneticAlgo(ABC):
             child = self.population[parentAIndex].clone()
             if (self.shouldCrossOver):
                 self.population[parentAIndex].crossover(self.population[parentBIndex])
-            child.mutate()
+            if (random.random() < self.mutationProb):
+                child.mutate()
             nextGeneration.append(child)
         #Set the new population
         self.population = nextGeneration

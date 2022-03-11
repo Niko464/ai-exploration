@@ -47,10 +47,11 @@ class Bird:
 		pipe = self.__getClosestPipe(pipes)
 		# 'Normalized' values for the AI to use
 		distX = (pipe.x - self.pos.x) / (self.screenSizeX)
+		distXWidth = (pipe.x + pipe.width - self.pos.x) / (self.screenSizeX)
 		distTopY = (self.pos.y - pipe.topY) / (self.screenSizeY)
 		distBottomY = (self.pos.y - pipe.bottomY) / (self.screenSizeY)
 		velYNorm = self.velY / 25
-		return [distX, distTopY, distBottomY, velYNorm]
+		return [distX, distXWidth, distTopY, distBottomY, velYNorm]
 
 	# gets closest pipe in front of the bird
 	def __getClosestPipe(self, pipes):
@@ -58,7 +59,7 @@ class Bird:
 		bestPipe = None
 		for pipe in pipes:
 			dist = pipe.x - self.pos.x
-			if (dist > 0 and dist < record):
+			if (dist + pipe.width > 0 and dist < record):
 				record = dist
 				bestPipe = pipe
 		return bestPipe

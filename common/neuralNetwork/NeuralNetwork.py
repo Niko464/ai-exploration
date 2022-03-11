@@ -62,7 +62,7 @@ class NeuralNetwork:
 					print(f"index that we should mutate: {rand - currCounter}")
 					print(f"val: {weights[rand - currCounter]}")
 					"""
-					weights[rand - currCounter] = np.random.uniform(low=-1.0, high=1.0)
+					weights[rand - currCounter] += np.random.uniform(low=-0.1, high=0.1)
 					mutated = True
 					break
 			biasesList = layer.getBiases()
@@ -79,7 +79,7 @@ class NeuralNetwork:
 					print(f"index that we should mutate: {rand - currCounter}")
 					print(f"val: {biases[rand - currCounter]}")
 					"""
-					biases[rand - currCounter] = np.random.uniform(low=0.0, high=1.0)
+					biases[rand - currCounter] += np.random.uniform(low=-0.1, high=0.1)
 					mutated = True
 					break
 
