@@ -59,7 +59,7 @@ class Bird:
 		bestPipe = None
 		for pipe in pipes:
 			dist = pipe.x - self.pos.x
-			if (dist + pipe.width > 0 and dist < record):
+			if (dist + pipe.width + self.radius > 0 and dist < record):
 				record = dist
 				bestPipe = pipe
 		return bestPipe

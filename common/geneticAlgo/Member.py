@@ -11,7 +11,9 @@ Then according to the problem, the Member object will call these functions if ne
 example, no need for a neural network, just an array of data
 """
 class Member(ABC):
-    def __init__(self):
+    def __init__(self, name: str, gen: int):
+        self.name = name
+        self.gen = gen
         self.fitness = -sys.maxsize - 1
         self.pickingProb = 0.0
 
@@ -34,6 +36,10 @@ class Member(ABC):
     """
     @abstractmethod
     def mutate(self):
+        pass
+
+    @abstractmethod
+    def saveToFile(self):
         pass
 
     """

@@ -8,14 +8,18 @@ from . import Member
 
 class GeneticAlgo(ABC):
     def __init__(self,
+        name: str,
         populationSize: int,
         mutationProb: float,
         shouldCrossOver: bool,
         amtRandomMembersPerGen: int,
         showEvery: int,
         statsEvery: int,
+        trainFromFile,
         fitnessFunc: FitnessFunc = None):
-        self.population = [self._createRandomMember() for _ in range(populationSize)]
+        self.name = name
+        self.currGen = 1
+        self.population = [self._createMember(name, trainFromFile) for _ in range(populationSize)]
         self.fitnessObj = fitnessFunc
         self.popSize = populationSize
         self.mutationProb = mutationProb
@@ -23,7 +27,6 @@ class GeneticAlgo(ABC):
         #This is the amount of members that will have totally random genes
         self.amtRandomMembersPerGen = amtRandomMembersPerGen
         self.shouldCrossOver = shouldCrossOver
-        self.currGen = 1
         self.showEvery = showEvery
         self.statsEvery = statsEvery
 
@@ -44,7 +47,7 @@ class GeneticAlgo(ABC):
             self.recordFitness = self.population[0].fitness
             self._foundNewFitnessRecord(self.population[0])
         #Perform Crossover and mutation
-        nextGeneration = [self._createRandomMember() for _ in range(self.amtRandomMembersPerGen)]
+        nextGeneration = [self._createMember(self.name) for _ in range(self.amtRandomMembersPerGen)]
         nextGeneration.append(self.population[0])
         #TODO: the best parents can be lost with this system
         for _ in range(self.popSize - self.amtRandomMembersPerGen - 1):
@@ -58,6 +61,7 @@ class GeneticAlgo(ABC):
             self.population[parentAIndex].fitness = oldFitness
             parentBIndex = self.__pickAMemberIndex()
             child = self.population[parentAIndex].clone()
+            child.gen += 1
             if (self.shouldCrossOver):
                 self.population[parentAIndex].crossover(self.population[parentBIndex])
             if (random.random() < self.mutationProb):
@@ -87,7 +91,7 @@ class GeneticAlgo(ABC):
 
     #This should be overriden by children classes in specific projects
     @abstractmethod
-    def _createRandomMember(self):
+    def _createMember(self, existingFileSave = None):
         pass
 
     #Called when a member exceeded the current fitnessRecord

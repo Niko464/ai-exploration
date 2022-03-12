@@ -15,18 +15,17 @@ import time
  
 
 """
-- Add statistics graph
-- Add x1.5 x2 x3 x4 buttons on display
+- add Curr gen on display
+- add score on display
 - create a Env object seperated from flappyenv
-- fix bugs with the AI not learning fast
 - Make calculations faster with threads ?
 - put statistic stuff in GeneticAlgo and not GeneticFlappy
 """
 def main():
 	popSize = 100
-	genAlgo = GeneticFlappy(popSize=popSize, showEvery=30, statsEvery=5)
+	genAlgo = GeneticFlappy(name="aaa", popSize=popSize, showEvery=1, statsEvery=5)
 
-	for generation in range(30):
+	for generation in range(3):
 		genAlgo.trainOneGeneration()
 	genAlgo.showStats()
 

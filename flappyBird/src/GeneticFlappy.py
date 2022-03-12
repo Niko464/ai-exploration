@@ -6,23 +6,28 @@ from src.FlappyEnvironment import *
 
 
 class GeneticFlappy(GeneticAlgo):
-	def __init__(self, popSize: int, showEvery: int, statsEvery: int):
+	def __init__(self, name: str, popSize: int, showEvery: int, statsEvery: int, trainFromFile = None):
 		super().__init__(
+			name=name,
 			populationSize=popSize,
 			mutationProb=0.2,
 			shouldCrossOver=True,
 			amtRandomMembersPerGen=2,
 			showEvery=showEvery,
-			statsEvery=statsEvery)
+			statsEvery=statsEvery,
+			trainFromFile=trainFromFile)
 		self.env = FlappyEnvironment(popSize)
 		self.statistics = []
 		self.otherStatistics = {"gen": [], "avg": [], "max": [], "min": []}
 
-	def _createRandomMember(self):
-		return MemberFlappy()
+	def _createMember(self, name: str, existingFileSave = None):
+		toReturn = MemberFlappy(name, self.currGen)
+		if (existingFileSave != None):
+			toReturn.neuralNetwork.loadBrainFromFile(existingFileSave)
+		return toReturn
 
 	def _foundNewFitnessRecord(self, recordMember):
-		recordMember.neuralNetwork.saveBrainToFile(f"brains/GEN-{self.currGen} Fitness-{recordMember.fitness}")
+		recordMember.saveToFile()
 
 	def _interactWithEnvironment(self):
 		#Calculate the game

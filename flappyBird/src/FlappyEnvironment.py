@@ -4,6 +4,7 @@ import datetime
 
 from common.other.Point import *
 from common.graphical.GameEngine import *
+from common.graphical.TextButton import *
 from src.Bird import *
 from src.Pipe import *
 
@@ -14,6 +15,11 @@ class FlappyEnvironment:
 		self.ticks = 0
 		self.gameStatePlay = True
 
+		self.screenSizeY = 450
+		self.screenSizeX = 900
+		self.minPipeSpacing = 145
+		self.maxPipeSpacing = 175
+		self.pipeSpeed = 8
 		self.reset(False)
 
 	def reset(self, shouldRender: bool):
@@ -21,12 +27,7 @@ class FlappyEnvironment:
 			"static": {},
 			"dynamic": []
 		}
-		self.screenSizeY = 450
-		self.screenSizeX = 900
-		self.pipeSpeed = 8
 		self.birds = []
-		self.minPipeSpacing = 115
-		self.maxPipeSpacing = 175
 		self.currentPipeSpacing = self.maxPipeSpacing
 		self.pipes = []
 		amtPipes = 3
@@ -95,14 +96,18 @@ class FlappyEnvironment:
 
 	def __graphicalReset(self):
 		self.currentGameStateIndex = 0
-		self.amtGameStatesPerSec = 20
-		self.gameStateIndexCounterInterval = 1000 / self.amtGameStatesPerSec
+		self.baseAmtGameStatesPerSec = 20
+		self._changeReplaySpeed(1)
 		self.lastTimeIncreasedGameStateIndex = datetime.datetime.now()
 
+		self.lenGameState = len(self.gameSummary["dynamic"])
 		self.fontSmall = pygame.font.Font(None, 20)
 		self.fontMedium = pygame.font.Font(None, 30)
-
-		self.lenGameState = len(self.gameSummary["dynamic"])
+		self.btnx1speed = TextButton(700, 420, "x1", self.fontMedium, drawBackground=True)
+		self.btnx2speed = TextButton(730, 420, "x2", self.fontMedium, drawBackground=True)
+		self.btnx3speed = TextButton(760, 420, "x3", self.fontMedium, drawBackground=True)
+		self.btnx4speed = TextButton(790, 420, "x4", self.fontMedium, drawBackground=True)
+		self.btnx8speed = TextButton(820, 420, "x8", self.fontMedium, drawBackground=True)
 
 	def __renderUpdate(self, screen):
 		screen.fill((255, 255, 255))
@@ -131,6 +136,18 @@ class FlappyEnvironment:
 		txtWidth, txtHeight = self.fontMedium.size(txtToRender)
 		txtSurface = self.fontMedium.render(txtToRender, False, "Black")
 		screen.blit(txtSurface, (startHud[0], startHud[1] - txtHeight))
+
+
+		if self.btnx1speed.update(screen):
+			self._changeReplaySpeed(1)
+		elif self.btnx2speed.update(screen):
+			self._changeReplaySpeed(2)
+		elif self.btnx3speed.update(screen):
+			self._changeReplaySpeed(3)
+		elif self.btnx4speed.update(screen):
+			self._changeReplaySpeed(4)
+		elif self.btnx8speed.update(screen):
+			self._changeReplaySpeed(8)
 
 	def __processEvents(self, event):
 		if (event.type == pygame.KEYDOWN):
@@ -161,3 +178,7 @@ class FlappyEnvironment:
 				print("arrived at the end of the replay")
 				return False
 		return True
+
+	def _changeReplaySpeed(self, multiplier):
+		self.amtGameStatesPerSec = self.baseAmtGameStatesPerSec * multiplier
+		self.gameStateIndexCounterInterval = 1000 / self.amtGameStatesPerSec

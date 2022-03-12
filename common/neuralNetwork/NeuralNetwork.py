@@ -111,6 +111,12 @@ class NeuralNetwork:
 		with open(file, 'wb') as handle:
 			pickle.dump(self.getBrain(), handle)
 
+	def loadBrainFromFile(self, file):
+		brain = None
+		with open(file, 'rb') as handle:
+			brain = pickle.load(handle)
+		self.loadBrain(brain)
+
 	def forward(self, inputs):
 		currInput = inputs
 		for index, layer in enumerate(self.layers):
