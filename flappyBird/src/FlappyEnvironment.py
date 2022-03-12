@@ -103,6 +103,7 @@ class FlappyEnvironment:
 		self.lenGameState = len(self.gameSummary["dynamic"])
 		self.fontSmall = pygame.font.Font(None, 20)
 		self.fontMedium = pygame.font.Font(None, 30)
+		self.fontBig = pygame.font.Font(None, 80)
 		self.btnx1speed = TextButton(700, 420, "x1", self.fontMedium, drawBackground=True)
 		self.btnx2speed = TextButton(730, 420, "x2", self.fontMedium, drawBackground=True)
 		self.btnx3speed = TextButton(760, 420, "x3", self.fontMedium, drawBackground=True)
@@ -113,9 +114,16 @@ class FlappyEnvironment:
 		screen.fill((255, 255, 255))
 		self._renderBirds(screen)
 		self._renderPipes(screen)
+		self._renderScore(screen)
 		self._renderHUD(screen)
 		return self._updateGameStateIndex()
 
+	def _renderScore(self, screen):
+		maxScore = max([bird.score for bird in self.gameSummary["dynamic"][self.currentGameStateIndex]["birds"]])
+		txtToRender = str(maxScore)
+		txtWidth, txtHeight = self.fontBig.size(txtToRender)
+		txtSurface = self.fontBig.render(txtToRender, False, "Black")
+		screen.blit(txtSurface, (self.screenSizeX / 2 - txtWidth, 25))
 
 	def _renderBirds(self, screen):
 		for bird in self.gameSummary["dynamic"][self.currentGameStateIndex]["birds"]:

@@ -1,5 +1,6 @@
 import sys
 import random
+import matplotlib.pyplot as plt
 
 from abc import ABC, abstractmethod
 from . import FitnessFunc
@@ -29,6 +30,8 @@ class GeneticAlgo(ABC):
         self.shouldCrossOver = shouldCrossOver
         self.showEvery = showEvery
         self.statsEvery = statsEvery
+        self.rewardsListAllGens = []
+        self.statisticsForGens = {"gen": [], "avg": [], "max": [], "min": []}
 
         if self.popSize <= self.amtRandomMembersPerGen:
             raise ValueError("amtRandomMembersPerGen can't be lower or the same as popSize")
@@ -36,6 +39,13 @@ class GeneticAlgo(ABC):
     #This should be called in a loop to train the AI
     def trainOneGeneration(self):
         self._interactWithEnvironment()
+        #Recording statistings accross generations
+        if (self.currGen % self.statsEvery == 0):
+            avg = sum(self.rewardsListAllGens[-self.statsEvery:]) / self.statsEvery
+            self.statisticsForGens["gen"].append(self.currGen)
+            self.statisticsForGens["max"].append(max(self.rewardsListAllGens[-self.statsEvery:]))
+            self.statisticsForGens["min"].append(min(self.rewardsListAllGens[-self.statsEvery:]))
+            self.statisticsForGens["avg"].append(avg)
         #Calc Fitness for the population
         if (self.fitnessObj != None):
             for member in self.population:
@@ -71,6 +81,13 @@ class GeneticAlgo(ABC):
         self.population = nextGeneration
         self.currGen += 1
 
+    def showStats(self):
+        plt.plot(self.statisticsForGens["gen"], self.statisticsForGens["avg"], label="average rewards")
+        plt.plot(self.statisticsForGens["gen"], self.statisticsForGens["min"], label="min rewards")
+        plt.plot(self.statisticsForGens["gen"], self.statisticsForGens["max"], label="max rewards")
+        plt.legend(loc=4)
+        plt.show()
+
     def __generatePickingProbabilities(self):
         total = 0
         for member in self.population:
@@ -99,6 +116,14 @@ class GeneticAlgo(ABC):
     def _foundNewFitnessRecord(self, member):
         pass
 
+    """
+    Needs to be included:
+    - interaction with environmnent
+    - self.rewardsListAllGens.append(np.mean(rewards))
+
+    Can be included:
+    - calculation of fitness
+    """
     @abstractmethod
     def _interactWithEnvironment(self):
         pass

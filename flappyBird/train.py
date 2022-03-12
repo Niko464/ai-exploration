@@ -15,15 +15,13 @@ import time
  
 
 """
-- add Curr gen on display
-- add score on display
+- add Curr gen on display ? (this isn't easy so I'm not doing it for now)
 - create a Env object seperated from flappyenv
 - Make calculations faster with threads ?
-- put statistic stuff in GeneticAlgo and not GeneticFlappy
 """
 def main():
 	popSize = 100
-	genAlgo = GeneticFlappy(name="aaa", popSize=popSize, showEvery=1, statsEvery=5)
+	genAlgo = GeneticFlappy(name="aaa", popSize=popSize, showEvery=1, statsEvery=1)
 
 	for generation in range(3):
 		genAlgo.trainOneGeneration()

@@ -22,6 +22,8 @@ class Bird:
 		self.isAlive = True
 		self.isOnGround = False
 		self.ticksAlive = 0
+		self.score = -1
+		self.lastClosestPipe = None
 
 	def update(self, tick, actions, pipes):
 		self.velY += self.gravity
@@ -45,6 +47,9 @@ class Bird:
 
 	def getObservation(self, pipes):
 		pipe = self.__getClosestPipe(pipes)
+		if (pipe != self.lastClosestPipe):
+			self.score += 1
+			self.lastClosestPipe = pipe
 		# 'Normalized' values for the AI to use
 		distX = (pipe.x - self.pos.x) / (self.screenSizeX)
 		distXWidth = (pipe.x + pipe.width - self.pos.x) / (self.screenSizeX)
