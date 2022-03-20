@@ -21,10 +21,13 @@ import time
 """
 def main():
 	popSize = 100
-	genAlgo = GeneticFlappy(name="aaa", popSize=popSize, showEvery=1, statsEvery=1)
-
-	for generation in range(3):
-		genAlgo.trainOneGeneration()
+	genAlgo = GeneticFlappy(name="apollo", popSize=popSize, showEvery=5, statsEvery=5)
+	amtGens = 100
+	counter = 0
+	done = False
+	while counter < amtGens and not done:
+		done = genAlgo.trainOneGeneration()
+		counter += 1
 	genAlgo.showStats()
 
 if __name__ == "__main__":

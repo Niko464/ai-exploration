@@ -17,7 +17,7 @@ import time
 def main():
 
 	ai = MemberFlappy("shit", 1)
-	ai.neuralNetwork.loadBrainFromFile("brains/best-Gen_12-Fitness_10002")
+	ai.neuralNetwork.loadBrainFromFile("brains/apollo-Gen_17-Fitness_10002")
 
 	env = FlappyEnvironment(1)
 	observations = env.reset(True)

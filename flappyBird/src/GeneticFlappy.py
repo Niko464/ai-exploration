@@ -11,6 +11,7 @@ class GeneticFlappy(GeneticAlgo):
 			mutationProb=0.2,
 			shouldCrossOver=True,
 			amtRandomMembersPerGen=2,
+			goalFitness=5000,
 			showEvery=showEvery,
 			statsEvery=statsEvery,
 			trainFromFile=trainFromFile)

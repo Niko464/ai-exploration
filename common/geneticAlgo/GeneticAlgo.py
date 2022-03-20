@@ -17,6 +17,7 @@ class GeneticAlgo(ABC):
         showEvery: int,
         statsEvery: int,
         trainFromFile,
+        goalFitness: float = None,
         fitnessFunc: FitnessFunc = None):
         self.name = name
         self.currGen = 1
@@ -30,6 +31,7 @@ class GeneticAlgo(ABC):
         self.shouldCrossOver = shouldCrossOver
         self.showEvery = showEvery
         self.statsEvery = statsEvery
+        self.goalFitness = goalFitness
         self.rewardsListAllGens = []
         self.statisticsForGens = {"gen": [], "avg": [], "max": [], "min": []}
 
@@ -46,6 +48,10 @@ class GeneticAlgo(ABC):
             self.statisticsForGens["max"].append(max(self.rewardsListAllGens[-self.statsEvery:]))
             self.statisticsForGens["min"].append(min(self.rewardsListAllGens[-self.statsEvery:]))
             self.statisticsForGens["avg"].append(avg)
+
+            if (self.goalFitness != None and self.statisticsForGens["avg"][-1] >= self.goalFitness):
+                print(f"Achieved goal fitness at generation {self.currGen}")
+                return True
         #Calc Fitness for the population
         if (self.fitnessObj != None):
             for member in self.population:
@@ -80,6 +86,7 @@ class GeneticAlgo(ABC):
         #Set the new population
         self.population = nextGeneration
         self.currGen += 1
+        return False
 
     def showStats(self):
         plt.plot(self.statisticsForGens["gen"], self.statisticsForGens["avg"], label="average rewards")

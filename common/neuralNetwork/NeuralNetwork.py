@@ -85,12 +85,14 @@ class NeuralNetwork:
 
 
 	def printNetwork(self):
+		print(f"Amt params: {self.totalParams}")
 		for index, layer in enumerate(self.layers):
 			print(f"LAYER {index}")
 			print("weights")
 			print(layer.getWeights())
 			print("biases")
 			print(layer.getBiases())
+			print("\n")
 		print("\n")
 
 
