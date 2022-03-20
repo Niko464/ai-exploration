@@ -21,8 +21,8 @@ import time
 """
 def main():
 	popSize = 100
-	genAlgo = GeneticFlappy(name="apollo", popSize=popSize, showEvery=5, statsEvery=5)
-	amtGens = 100
+	genAlgo = GeneticFlappy(name="testBeforePush", popSize=popSize, showEvery=5, statsEvery=5)
+	amtGens = 20
 	counter = 0
 	done = False
 	while counter < amtGens and not done:

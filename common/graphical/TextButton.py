@@ -6,6 +6,8 @@ class TextButton():
 		self.font = font
 		self.color = color
 		self.surface = font.render(text, False, color)
+		self.x = x
+		self.y = y
 		self.rect = pygame.Rect(x, y, txtWidth, txtHeight)
 		self.clicked = False
 		self.drawBackground = drawBackground
@@ -16,9 +18,9 @@ class TextButton():
 	def setText(self, newText):
 		txtWidth, txtHeight = self.font.size(newText)
 		self.surface = self.font.render(newText, False , self.color)
-		self.rect = pygame.Rect(x, y, txtWidth, txtHeight)
+		self.rect = pygame.Rect(self.x, self.y, txtWidth, txtHeight)
 
-	def update(self, screen):
+	def update(self, screen, x: None, y: None):
 		gotClicked = False
 		mousePos = pygame.mouse.get_pos()
 
@@ -32,6 +34,6 @@ class TextButton():
 
 		#draw button on screen
 		if (self.drawBackground):
-			screen.blit(self.bgSurface, (self.rect.x, self.rect.y))
-		screen.blit(self.surface, (self.rect.x, self.rect.y))
+			screen.blit(self.bgSurface, (self.rect.x if x is None else x, self.rect.y if y is None else y))
+		screen.blit(self.surface, (self.rect.x if x is None else x, self.rect.y if y is None else y))
 		return gotClicked
