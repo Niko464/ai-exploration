@@ -1,11 +1,14 @@
 import copy
-from Point import *
 import math
 import numpy as np
-from MyMath import *
 import random
 
-class Player:
+from common.other.Point import Point
+from common.math.distances import getDistance
+from common.math.circles import isPointInCircle
+from common.math.angles import getAngleTwoVectors0To180, getAngleTwoVectors0To360
+
+class Pod:
 	dividerVelocity = 800 - -800
 	dividerDiffTwoPositions = 16000 - -16000
 	dividerAngle = 360 - 0
@@ -27,7 +30,7 @@ class Player:
 		#end
 		self._updateLookingVector()
 
-	def getAIInputs(self):
+	def getObservation(self):
 		to_return = []
 		
 		nextCpPos = self.cpList[self.nextCheckpointId]
@@ -45,6 +48,7 @@ class Player:
 		to_return.append(self._normalizeDistance(getDistance(nextCpPos, self.pos)))
 		to_return.append(self._normalizeAngle0To360(self.worldAngle))
 
+		"""
 		print(f"getAIInputs | START")
 		print(f"getAIInputs | nextCp | {nextCpPos}")
 		print(f"getAIInputs | nextnextCp | {nextnextCpPos}")
@@ -55,6 +59,7 @@ class Player:
 		print(f"getAIInputs | {getDistance(nextCpPos, self.pos)} {to_return[4]}")
 		print(f"getAIInputs | {self.worldAngle} {to_return[5]}")
 		print(f"getAIInputs | END")
+		"""
 		#to_return.append(vecNextCpNextNextCpX)
 		#to_return.append(vecNextCpNextNextCpY)
 		return to_return
@@ -63,7 +68,7 @@ class Player:
 	def computeTick(self, aiOutput, tickIndex):
 		if self.isAlive == False or self.didFinish == True:
 			return False
-		
+		aiOutput = aiOutput[0]
 		aiAngle = self._unNormalizeAngle0To360(aiOutput[0])
 		thrust = min(100, self._unNormalizeThrust(aiOutput[1]))
 		print(f"player Input AKA aiOutput \tthrust: {thrust} aiAngle: {aiAngle}")
@@ -96,19 +101,19 @@ class Player:
 		return (value * divider) + minVal
 
 	def _normalizeVelocity(self, value):
-		return self._minMaxNormalization(value, -800, Player.dividerVelocity)
+		return self._minMaxNormalization(value, -800, Pod.dividerVelocity)
 
 	def _normalizeDifferenceTwoPositionsVector(self, value):
-		return self._minMaxNormalization(value, -16000, Player.dividerDiffTwoPositions)
+		return self._minMaxNormalization(value, -16000, Pod.dividerDiffTwoPositions)
 
 	def _normalizeAngle0To360(self, value):
-		return self._minMaxNormalization(value, 0, Player.dividerAngle)
+		return self._minMaxNormalization(value, 0, Pod.dividerAngle)
 
 	def _normalizeDistance(self, value):
 		return self._minMaxNormalization(value, 0, 18000)
 
 	def _unNormalizeAngle0To360(self, value):
-		return self._minMaxUnNormalization(value, 0, Player.dividerAngle)
+		return self._minMaxUnNormalization(value, 0, Pod.dividerAngle)
 
 	def _unNormalizeThrust(self, value):
 		return self._minMaxUnNormalization(value, 0, 100)
@@ -187,3 +192,6 @@ class Player:
 			"lookingVector": copy.deepcopy(self.lookingVector),
 			"targetPos": Point(self.targetPos.x, self.targetPos.y)
 		}
+
+	def getFitness(self, ticks):
+		return ((self.totalCheckpointsPassed * 30000) - getDistance(self.cpList[self.nextCheckpointId], self.pos) - (ticks * 100))

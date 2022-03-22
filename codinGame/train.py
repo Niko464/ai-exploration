@@ -1,10 +1,11 @@
-import GameEngine
-import portable.graphical.GameEngine
-from specific.graphical import *
-from array import array
-import random
-from ai.LayerDense import *
-from ai.ActivationFuncs import *
+import os
+import sys
+
+p = os.path.abspath("..")
+sys.path.append(p)
+
+from src.MPRGenetic import *
+
 
 """
 
@@ -116,38 +117,6 @@ class GeneticAlgoAI:
 
 
 
-class Member:
-	def __init__(self, ID):
-		self.ID = ID
-		self.amtInputFeatures = 6
-		self.amtOutputFeatures = 2
-		self.layer1 = LayerDense(self.amtInputFeatures, 20)
-		self.layer2 = LayerDense(20, 20)
-		self.layer3 = LayerDense(20, self.amtOutputFeatures)
-		self.relu = ActivationRelu()
-
-	#Returns the output of this member's neural network for a game tick
-	def computeOutputsForTick(self, arrayInputs):
-
-		print(f"Member {self.ID} Debug")
-		print(f"{arrayInputs}")
-		self.layer1.forward(np.array(arrayInputs))
-		self.relu.forward(self.layer1.output)
-		print(f"Layer 1 Output after activation: {self.relu.output}")
-		self.layer2.forward(self.relu.output)
-		self.relu.forward(self.layer2.output)
-		print(f"Layer 2 Output after activation: {self.relu.output}")
-		self.layer3.forward(self.relu.output)
-		self.relu.forward(self.layer3.output)
-		print(f"Layer 3 Output after activation: {self.relu.output}")
-
-		self.output = self.relu.output
-
-		#return the first elem because it was built to allow a population and not just one member
-		return self.output[0]
-
-
-
 
 
 
@@ -179,30 +148,16 @@ First Step is to make an AI learn to follow the checkpoints to discover AI
 Second Step is to make enemies, and teams, make them learn to fight enemies, help allies
 """
 def main():
-	populationSize = 1
-	#ai = createNewAi("first", "saves/ai/", populationSize)
-	ai = GeneticAlgoAI()
-	ai.initCreate("saves/ai", populationSize)
-	ai.startLearning()
+	popSize = 3
+	genAlgo = MPRGenetic(name="firstTest", popSize=popSize, showEvery=5, statsEvery=5)
+	amtGens = 5
+	counter = 0
+	done = False
+	while counter < amtGens and not done:
+		done = genAlgo.trainOneGeneration()
+		counter += 1
+	genAlgo.showStats()
 
-	"""
-	game = GameEngine.GameEngine(	amtPlayers=populationSize,
-									saveCpFile=None,
-									loadCpFile="saves/checkpoints/map1")
-	game.reset()
-	print("Starting to compute Game")
-	while game.computeTick(ai.computeOutputsForTick(game.getAIInputs())): pass
-	print("Finished")
-	computedGame = game.getGameSummary()
-	#This is a project specific class
-	graphicalDisplayLogic = MadPodRaceGraphic.MadPodRaceGraphic(computedGame)
-	#This is a class that can be reused
-	graphicalEngine = portable.graphical.GameEngine.GameEngine(1600, 900, "Mad Pod Racing", graphicalDisplayLogic)
-
-	#initialise surfaces etc for the game
-	graphicalDisplayLogic.init()
-	while graphicalEngine.runGameLoop(): pass
-	"""
 
 if __name__ == "__main__":
 	main()

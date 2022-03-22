@@ -7,23 +7,31 @@ from common.graphical.TextButton import *
 from abc import ABC, abstractmethod
 
 class Environment(ABC):
-	def __init__(self, envName: str, amtAgents: int, baseAmtGameStatesPerSec: int):
+	def __init__(self, envName: str, amtAgents: int, baseAmtGameStatesPerSec: int, screenSizeX: int, screenSizeY: int):
 		self.baseAmtGameStatesPerSec = baseAmtGameStatesPerSec
 		self.envName = envName
 		self.amtAgents = amtAgents
 		self.shouldRender = False
 		self.ticks = 0
+		self.screenSizeX = screenSizeX
+		self.screenSizeY = screenSizeY
 		self.gameStatePlay = True
 		self.gameSummary = {
 			"static": {},
 			"dynamic": []
 		}
 
+	"""
+	Returns an array of observations
+	"""
 	@abstractmethod
 	def reset(self, shouldRender: bool):
 		pass
 
-	# gets executed every game tick
+	"""
+	Gets executed every game tick
+	Returns what this func returns
+	"""
 	def step(self, aiInputs):
 		observations = []
 		rewards = []
@@ -42,10 +50,16 @@ class Environment(ABC):
 		self.ticks += 1
 		return (observations, rewards, done, None)
 
+	"""
+	Returns a boolean
+	"""
 	@abstractmethod
 	def _isGameDone(self):
 		pass
 
+	"""
+	Returns a summary of the current Tick as a json Object
+	"""
 	@abstractmethod
 	def _getTickSummary(self):
 		pass
@@ -54,14 +68,20 @@ class Environment(ABC):
 	#This is all the graphical part of the environment
 
 
+	"""
+	This should be called in the step func, when it's time to render a finished game
+	"""
 	def _renderGame(self):
-		graphicalEngine = GameEngineV2(self.screenSizeX, self.screenSizeY, self.envName, self._renderUpdate, self.__processEvents)
+		graphicalEngine = GameEngineV2(self.screenSizeX, self.screenSizeY, self.envName, self._renderUpdate, self._processEvents)
 
-		self.__graphicalReset()
+		self._graphicalReset()
 		#Draw the whole game
 		while graphicalEngine.runGameLoop(): pass
 
-	def __graphicalReset(self):
+	"""
+	This is called before starting to draw the playback of the environment
+	"""
+	def _graphicalReset(self):
 		self.currentGameStateIndex = 0
 		self._changeReplaySpeed(1)
 		self.lastTimeIncreasedGameStateIndex = datetime.datetime.now()
@@ -76,6 +96,9 @@ class Environment(ABC):
 		self.btnx4speed = TextButton(790, 420, "x4", self.fontMedium, drawBackground=True)
 		self.btnx8speed = TextButton(820, 420, "x8", self.fontMedium, drawBackground=True)
 
+	"""
+	Returns bool: if we should continue playing the playback or stop
+	"""
 	@abstractmethod
 	def _renderUpdate(self, screen):
 		pass
@@ -86,7 +109,9 @@ class Environment(ABC):
 		"""
 
 
-
+	"""
+	Draws the current gametick on the screen
+	"""
 	def _renderGameTicks(self, screen, posX, posY):
 		txtToRender = "GameTick: " + str(self.currentGameStateIndex) + " / " + str(self.lenGameState)
 		txtWidth, txtHeight = self.fontMedium.size(txtToRender)
@@ -94,6 +119,9 @@ class Environment(ABC):
 		screen.blit(txtSurface, (posX, posY - txtHeight))
 
 
+	"""
+	Draws the buttons for changing the playback speed on the screen
+	"""
 	def _renderReplaySpeedBtns(self, screen, x = 700, y = 420):
 		if self.btnx1speed.update(screen, x, y):
 			self._changeReplaySpeed(1)
@@ -106,7 +134,10 @@ class Environment(ABC):
 		elif self.btnx8speed.update(screen, x + 120, y):
 			self._changeReplaySpeed(8)
 
-	def __processEvents(self, event):
+	"""
+	This should also be called even when overriding the class
+	"""
+	def _processEvents(self, event):
 		if (event.type == pygame.KEYDOWN):
 			if event.key == pygame.K_LEFT:
 				self.gameStatePlay = False
@@ -122,7 +153,9 @@ class Environment(ABC):
 
 
 
-	#This should be called at the end of _renderUpdate
+	"""
+	This should be called at the end of _renderUpdate
+	"""
 	def _updateGameStateIndex(self):
 		if self.gameStatePlay == False:
 			return

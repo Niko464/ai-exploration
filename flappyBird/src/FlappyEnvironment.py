@@ -9,9 +9,7 @@ from src.Pipe import *
 
 class FlappyEnvironment(Environment):
 	def __init__(self, amtAgents: int):
-		super().__init__("Flappy Bird AI", amtAgents, 20)
-		self.screenSizeY = 450
-		self.screenSizeX = 900
+		super().__init__("Flappy Bird AI", amtAgents, 20, 900, 450)
 		self.minPipeSpacing = 145
 		self.maxPipeSpacing = 175
 		self.pipeSpeed = 8
@@ -22,6 +20,8 @@ class FlappyEnvironment(Environment):
 			"static": {},
 			"dynamic": []
 		}
+		self.shouldRender = shouldRender
+		self.ticks = 0
 		self.birds = []
 		self.currentPipeSpacing = self.maxPipeSpacing
 		self.pipes = []
@@ -29,9 +29,7 @@ class FlappyEnvironment(Environment):
 		pipeSpacingX = (self.screenSizeX + 60) / amtPipes
 		for i in range(3):
 			self.pipes.append(Pipe(self.screenSizeX + 50, self.screenSizeX + 50 + i * pipeSpacingX , self.pipeSpeed, self.screenSizeY, self.currentPipeSpacing))
-		self.shouldRender = shouldRender
-
-		self.ticks = 0
+		
 		startX = 150
 		startY = self.screenSizeY / 2
 		self.birds = [Bird(index, startX, startY, self.screenSizeX, self.screenSizeY, self.pipeSpeed) for index in range(self.amtAgents)]

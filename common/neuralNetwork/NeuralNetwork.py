@@ -119,6 +119,7 @@ class NeuralNetwork:
 			brain = pickle.load(handle)
 		self.loadBrain(brain)
 
+	#TODO: check if I shouldn't return something else than the last layer's output, maybe the last activation funcs, output ?
 	def forward(self, inputs):
 		currInput = inputs
 		for index, layer in enumerate(self.layers):
