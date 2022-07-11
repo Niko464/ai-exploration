@@ -47,8 +47,8 @@ class MPREnvironment(Environment):
 		self.shouldRender = shouldRender
 
 		self.players = []
-		for _ in range(self.amtPlayers):
-			self.players.append(Pod(self.checkpoints, self.playerRadius))
+		for ID in range(self.amtPlayers):
+			self.players.append(Pod(ID, self.checkpoints, self.playerRadius))
 		return [player.getObservation() for player in self.players]
 
 
@@ -58,17 +58,17 @@ class MPREnvironment(Environment):
 		- append a game state to an array of game states
 	"""
 	def step(self, aiOutputs: array):
-		observations = []
-		rewards = []
+		observations = [0] * self.amtPlayers
+		rewards = [0] * self.amtPlayers
 
 		"""
 		INSERT LOGIC
 		"""
-		#print(f"computeTick GameEngine {aiOutputs}")
 		for index, p in enumerate(self.players):
-			p.computeTick(aiOutputs[index], self.ticks)
-			observations.append(p.getObservation())
-			rewards.append(0)
+			if p.isAlive == True and p.didFinish == False:
+				p.computeTick(aiOutputs[index], self.ticks)
+			observations[index] = p.getObservation()
+			rewards[index] += p.getFitness()
 
 		if (self.shouldRender):
 			self.gameSummary["dynamic"].append(self._getTickSummary())
@@ -76,9 +76,6 @@ class MPREnvironment(Environment):
 		if (done):
 			if self.shouldRender:
 				self._renderGame()
-			#This is custom to this game
-			for index, p in enumerate(self.players):
-				rewards[index] = p.getFitness(self.ticks)
 
 		self.ticks += 1
 		return (observations, rewards, done, None)
@@ -98,6 +95,7 @@ class MPREnvironment(Environment):
 		self.playerColorAlive = (255, 143, 22)
 		self.playeColorDead = (170, 50, 70)
 		self.showCoordinates = [Point(), 0]
+		self._changeReplaySpeed(2)
 
 	def _processEvents(self, event):
 		super()._processEvents(event)
@@ -111,6 +109,7 @@ class MPREnvironment(Environment):
 		self._drawPlayers(screen)
 		self._drawCoords(screen)
 		self._renderGameTicks(screen, 20, 880)
+		self._renderReplaySpeedBtns(screen, 1400, 840)
 		return self._updateGameStateIndex()
 
 	def _drawCheckpoints(self, screen):
@@ -133,6 +132,10 @@ class MPREnvironment(Environment):
 			pygame.draw.circle(screen, color, (pX, pY), 400 / 10, 3)
 			pygame.draw.line(screen, color, (pX, pY), (pX + p["lookingVector"][0] * 400 / 10, pY + p["lookingVector"][1] * 400 / 10), 3)
 			pygame.draw.line(screen, color, (pX, pY), (p["targetPos"].x / 10, p["targetPos"].y / 10), 1)
+			txtToRender = str(p["ID"])
+			txtWidthOne, txtHeightOne = self.fontSmall.size(txtToRender)
+			txtSurface = self.fontSmall.render(txtToRender, False, "Black")
+			screen.blit(txtSurface, (pX - txtWidthOne / 2, pY - txtHeightOne))
 
 	def _drawCoords(self, screen):
 		if (self.showCoordinates[1] <= 0):

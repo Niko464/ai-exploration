@@ -26,4 +26,4 @@ class MemberFlappy(Member):
 		return self.neuralNetwork.forward(data)
 
 	def saveToFile(self):
-		self.neuralNetwork.saveBrainToFile(f"brains/{self.name}-Gen_{self.gen}-Fitness_{self.fitness}")
+		self.neuralNetwork.saveBrainToFile(f"brains/{self.name}-Gen_{self.gen}-Fitness_{self.fitness}.brain")

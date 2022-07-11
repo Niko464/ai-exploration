@@ -24,6 +24,10 @@ class TextButton():
 		gotClicked = False
 		mousePos = pygame.mouse.get_pos()
 
+		if x is not None:
+			self.rect.x = x
+		if y is not None:
+			self.rect.y = y
 		#check mouseover and clicked conditions
 		if self.rect.collidepoint(mousePos):
 			if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
@@ -34,6 +38,6 @@ class TextButton():
 
 		#draw button on screen
 		if (self.drawBackground):
-			screen.blit(self.bgSurface, (self.rect.x if x is None else x, self.rect.y if y is None else y))
-		screen.blit(self.surface, (self.rect.x if x is None else x, self.rect.y if y is None else y))
+			screen.blit(self.bgSurface, (self.rect.x, self.rect.y))
+		screen.blit(self.surface, (self.rect.x, self.rect.y))
 		return gotClicked

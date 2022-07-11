@@ -32,7 +32,7 @@ class GeneticAlgo(ABC):
         self.showEvery = showEvery
         self.statsEvery = statsEvery
         self.goalFitness = goalFitness
-        self.rewardsListAllGens = []
+        self.rewardsListAllGens = {"gen": [], "avg": [], "max": [], "min": []}
         self.statisticsForGens = {"gen": [], "avg": [], "max": [], "min": []}
 
         if self.popSize <= self.amtRandomMembersPerGen:
@@ -43,10 +43,10 @@ class GeneticAlgo(ABC):
         self._interactWithEnvironment()
         #Recording statistings accross generations
         if (self.currGen % self.statsEvery == 0):
-            avg = sum(self.rewardsListAllGens[-self.statsEvery:]) / self.statsEvery
+            avg = sum(self.rewardsListAllGens["avg"][-self.statsEvery:]) / self.statsEvery
             self.statisticsForGens["gen"].append(self.currGen)
-            self.statisticsForGens["max"].append(max(self.rewardsListAllGens[-self.statsEvery:]))
-            self.statisticsForGens["min"].append(min(self.rewardsListAllGens[-self.statsEvery:]))
+            self.statisticsForGens["max"].append(max(self.rewardsListAllGens["max"][-self.statsEvery:]))
+            self.statisticsForGens["min"].append(min(self.rewardsListAllGens["min"][-self.statsEvery:]))
             self.statisticsForGens["avg"].append(avg)
 
             if (self.goalFitness != None and self.statisticsForGens["avg"][-1] >= self.goalFitness):
@@ -97,10 +97,16 @@ class GeneticAlgo(ABC):
 
     def __generatePickingProbabilities(self):
         total = 0
+        minVal = min([member.fitness for member in self.population])
         for member in self.population:
-            total += member.fitness
+            total += (member.fitness - minVal)
+        #this happens when we train the algo with a loaded file
+        if (total == 0):
+            for member in self.population:
+                member.pickingProb = 1.0
+            return
         for member in self.population:
-            member.pickingProb = member.fitness / total
+            member.pickingProb = (member.fitness - minVal) / total
 
     #Picks a member according to the probabilities of each member to get picked
     #Returns an index in the population list

@@ -25,3 +25,10 @@ class ActivationSoftMax(ActivationFunc):
 		exp_values = np.exp(inputs - np.max(inputs, axis=1, keepdims=True))
 		probabilities = exp_values / np.sum(exp_values, axis=1, keepdims=True)
 		self.output = probabilities
+
+class ActivationSigmoid(ActivationFunc):
+	def __init__(self):
+		super().__init__()
+
+	def forward(self, inputs):
+		self.output = [1 / (1 + np.exp(-x)) for x in inputs]

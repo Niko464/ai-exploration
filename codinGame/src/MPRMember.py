@@ -9,9 +9,10 @@ class MPRMember(Member):
 		super().__init__(name, gen)
 		self.neuralNetwork = NeuralNetwork()
 		self.relu = ActivationRelu()
+		self.sigmoid = ActivationSigmoid()
 		self.neuralNetwork.addLayer(6, 10, self.relu)
 		self.neuralNetwork.addLayer(10, 10, self.relu)
-		self.neuralNetwork.addLayer(10, 2, self.relu)
+		self.neuralNetwork.addLayer(10, 2, self.sigmoid)
 		self.randomize()
 
 	def randomize(self):
@@ -27,4 +28,4 @@ class MPRMember(Member):
 		return self.neuralNetwork.forward(data)
 
 	def saveToFile(self):
-		self.neuralNetwork.saveBrainToFile(f"brains/{self.name}-Gen_{self.gen}-Fitness_{self.fitness}")
+		self.neuralNetwork.saveBrainToFile(f"brains/{self.name}-Gen_{self.gen}-Fitness_{int(self.fitness)}.brain")

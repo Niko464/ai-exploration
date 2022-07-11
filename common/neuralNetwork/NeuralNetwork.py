@@ -126,4 +126,4 @@ class NeuralNetwork:
 			layer.forward(currInput)
 			self.activationFuncs[index].forward(layer.output)
 			currInput = self.activationFuncs[index].output
-		return self.layers[-1].output
+		return self.activationFuncs[-1].output

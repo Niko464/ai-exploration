@@ -147,7 +147,7 @@ class SalesDroneAlgo:
 #TODO: optimization, calculate all distances once, then use a lookup table
 #TODO: optimization, use "simulated annealing"
 def main():
-	saveFile = "saves/map20"
+	saveFile = "saves/map5"
 	cityInfos = loadObject(saveFile)
 	graphicalDisplayLogic = SalesDroneGraphical(cityInfos)
 

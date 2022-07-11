@@ -4,18 +4,20 @@ from src.MPREnvironment import *
 
 
 class MPRGenetic(GeneticAlgo):
-	def __init__(self, name: str, popSize: int, showEvery: int, statsEvery: int, trainFromFile = None):
+	def __init__(self, name: str, popSize: int, showEvery: int, statsEvery: int, amtRandomMembersPerGen: int, trainFromFile = None):
 		super().__init__(
 			name=name,
 			populationSize=popSize,
-			mutationProb=0.2,
+			mutationProb=0.4,
 			shouldCrossOver=True,
-			amtRandomMembersPerGen=2,
+			amtRandomMembersPerGen=amtRandomMembersPerGen,
 			goalFitness=5000000,
 			showEvery=showEvery,
 			statsEvery=statsEvery,
 			trainFromFile=trainFromFile)
-		self.env = MPREnvironment(popSize)
+		self.env = MPREnvironment(	amtPlayers=popSize,
+									saveCpFile="",
+									loadCpFile="maps/" + "map" + ".map")
 
 	def _createMember(self, name: str, existingFileSave = None):
 		toReturn = MPRMember(name, self.currGen)
@@ -37,7 +39,9 @@ class MPRGenetic(GeneticAlgo):
 			datafromAi = [member.predict(observations[index]) for index, member in enumerate(self.population)]
 			observations, rewards, done, _ = self.env.step(datafromAi)
 		#Stats
-		self.rewardsListAllGens.append(np.mean(rewards))
+		self.rewardsListAllGens["min"].append(min(rewards))
+		self.rewardsListAllGens["max"].append(max(rewards))
+		self.rewardsListAllGens["avg"].append(np.mean(rewards))
 
 		#Calc fitness for each member since I didn't specify a FitnessFunc to the super() class
 		for index, member in enumerate(self.population):
