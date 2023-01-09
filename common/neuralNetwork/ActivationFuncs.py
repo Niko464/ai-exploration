@@ -31,4 +31,12 @@ class ActivationSigmoid(ActivationFunc):
 		super().__init__()
 
 	def forward(self, inputs):
+		# length = len(inputs)
+		# self.output = np.empty(length)
+		# for i in range(length):
+		# 	print("f")
+		# 	print(f"shit { 1 / (1 + np.exp(-inputs[i]))}")
+		# 	print("g")
+		# 	self.output[i] = 1 / (1 + np.exp(-inputs[i]))
 		self.output = [1 / (1 + np.exp(-x)) for x in inputs]
+		return self.output

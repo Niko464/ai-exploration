@@ -8,6 +8,7 @@ from src.Pod import Pod
 from src.CheckpointGenerator import CheckpointGenerator
 from common.geneticAlgo.Environment import Environment
 from common.other.Point import Point
+from numba import njit
 
 #TODO: Boost & Shield
 class MPREnvironment(Environment):

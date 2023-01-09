@@ -9,10 +9,34 @@ from common.math.distances import getDistance
 from common.math.circles import isPointInCircle
 from common.math.angles import getAngleTwoVectors0To180, getAngleTwoVectors0To360
 
+def minMaxNormalization(value, maxVal):
+	return value / maxVal
+
+def minMaxUnNormalization(value, maxVal):
+	return value * maxVal
+
+def normalizeVelocity(value):
+	#TODO: this calc and the one under it is wrong
+	#Values can be between -800 and 800
+	return minMaxNormalization(value + 800, 1600)
+
+def normalizeDifferenceTwoPositionsVector(value):
+	#Values between -16k and +16k
+	return minMaxNormalization(value + 16000, 32000)
+
+def normalizeAngle0To360(value):
+	return minMaxNormalization(value, 360)
+
+def normalizeDistance(value):
+	return minMaxNormalization(value, 18000)
+
+def unNormalizeAnglemin18max18(value):
+	return minMaxUnNormalization(value, 36.0) - 18.0
+
+def unNormalizeThrust(value):
+	return minMaxUnNormalization(value, 100)
+
 class Pod:
-	dividerVelocity = 800 - -800
-	dividerDiffTwoPositions = 16000 - -16000
-	dividerAngle = 360 - 0
 	debug = False
 	def __init__(self, ID, cpList, playerRadius):
 		self.cpList = cpList
@@ -34,13 +58,12 @@ class Pod:
 		if (Pod.debug and os.path.exists("debug" + str(ID))):
 			os.remove("debug/" + str(ID))
 		#end
-		self._updateLookingVector()
 
 	def getObservation(self):
 		#This is an optimisation, if he's dead, we don't need to recalculate everything
 		if (self.isAlive == False):
 			return self.observation
-		self.observation = []
+		self.observation = np.zeros(6)
 		
 		nextCpPos = self.cpList[self.nextCheckpointId]
 		nextnextCpPos = self.cpList[(self.nextCheckpointId + 1) % len(self.cpList)]
@@ -50,12 +73,12 @@ class Pod:
 		vecNextCpNextNextCpX = nextnextCpPos.x - nextCpPos.x
 		vecNextCpNextNextCpY = nextnextCpPos.y - nextCpPos.y
 
-		self.observation.append(self._normalizeDifferenceTwoPositionsVector(vecPosNextCpX))
-		self.observation.append(self._normalizeDifferenceTwoPositionsVector(vecPosNextCpY))
-		self.observation.append(self._normalizeVelocity(self.velocityVector[0]))
-		self.observation.append(self._normalizeVelocity(self.velocityVector[1]))
-		self.observation.append(self._normalizeDistance(getDistance(nextCpPos, self.pos)))
-		self.observation.append(self._normalizeAngle0To360(self.worldAngle))
+		self.observation[0] = normalizeDifferenceTwoPositionsVector(vecPosNextCpX)
+		self.observation[1] = normalizeDifferenceTwoPositionsVector(vecPosNextCpY)
+		self.observation[2] = normalizeVelocity(self.velocityVector[0])
+		self.observation[3] = normalizeVelocity(self.velocityVector[1])
+		self.observation[4] = normalizeDistance(getDistance(nextCpPos, self.pos))
+		self.observation[5] = normalizeAngle0To360(self.worldAngle)
 
 		if Pod.debug:
 			with open("debug/" + str(self.ID) + ".debug", "a") as file:
@@ -68,107 +91,50 @@ class Pod:
 				file.write(f"getAIInputs | velocityVectorY {self.velocityVector[1]} {self.observation[3]}\n")
 				file.write(f"getAIInputs | distNextCp {getDistance(nextCpPos, self.pos)} {self.observation[4]}\n")
 				file.write(f"getAIInputs | worldAngle {self.worldAngle} {self.observation[5]}\n")
-		#to_return.append(vecNextCpNextNextCpX)
-		#to_return.append(vecNextCpNextNextCpY)
 		return self.observation
-
 
 	def computeTick(self, aiOutput, tickIndex):
 		if self.isAlive == False or self.didFinish == True:
 			return False
 		aiOutput = aiOutput[0]
-		aiAngle = self._unNormalizeAnglemin18max18(aiOutput[0])
-		thrust = min(100, self._unNormalizeThrust(aiOutput[1]))
+		aiAngle = unNormalizeAnglemin18max18(aiOutput[0])
+		thrust = min(100, unNormalizeThrust(aiOutput[1]))
 		
-		if aiOutput[0] < 0.25:
-			aiAngle = -18.0
-		elif aiOutput[0] > 0.75:
-			aiAngle = 18.0
-		if aiOutput[1] < 0.25:
-			thrust = 0
-		elif aiOutput[1] > 0.75:
-			thrust = 100
+		# if aiOutput[0] < 0.10:
+		# 	aiAngle = -18.0
+		# elif aiOutput[0] > 0.90:
+		# 	aiAngle = 18.0
+		# if aiOutput[1] < 0.10:
+		# 	thrust = 0
+		# elif aiOutput[1] > 0.90:
+		# 	thrust = 100
 
-		if Pod.debug:
-			with open("debug/" + str(self.ID) + ".debug", "a") as file:
-				file.write(f"{tickIndex} player Input not parsed: {aiOutput}\n")
-				file.write(f"{tickIndex} player Input AKA aiOutput \tthrust: {thrust} aiAngle: {aiAngle}\n")
+		# if Pod.debug:
+		# 	with open("debug/" + str(self.ID) + ".debug", "a") as file:
+		# 		file.write(str(tickIndex) + " player Input not parsed: " + str(aiOutput) + "\n")
+		# 		file.write(str(tickIndex) + " player Input AKA aiOutput \tthrust: " + str(thrust) + " aiAngle: " + str(aiAngle) + "\n")
 		
-		self._updateTargetPos(aiAngle)
-		if (tickIndex == 0):
-			self.targetPos.x = self.cpList[self.nextCheckpointId].x
-			self.targetPos.y = self.cpList[self.nextCheckpointId].y
-		#Update looking Vector to make calcs for the rotation part of the game
-		self._updateLookingVector()
-		self._updateRotation(tickIndex)
-		
-		"""
-		thrust = 100
-		self.targetPos.x = self.cpList[self.nextCheckpointId].x
-		self.targetPos.y = self.cpList[self.nextCheckpointId].y
-		self._updateLookingVector()
-		self._updateRotation(tickIndex)
-		"""
-		#Update Looking vector for the graphic game representation
-		self._updateLookingVector()
-		self._updateVelocityVector(thrust)
-		self._updatePosition()
-		self._applyFriction()
-		self._truncateValues()
-		self._checkCPCollisions()
-		self._checkDeath()
-		if (self.isAlive):
-			self.ticksAlive += 1
-		return self.isAlive
-
-	def _minMaxNormalization(self, value, minVal, divider):
-		return (value - minVal) / divider
-
-	def _minMaxUnNormalization(self, value, minVal, divider):
-		return (value * divider) + minVal
-
-	def _normalizeVelocity(self, value):
-		return self._minMaxNormalization(value, -800, Pod.dividerVelocity)
-
-	def _normalizeDifferenceTwoPositionsVector(self, value):
-		return self._minMaxNormalization(value, -16000, Pod.dividerDiffTwoPositions)
-
-	def _normalizeAngle0To360(self, value):
-		return self._minMaxNormalization(value, 0, Pod.dividerAngle)
-
-	def _normalizeDistance(self, value):
-		return self._minMaxNormalization(value, 0, 18000)
-
-	def _unNormalizeAnglemin18max18(self, value):
-		return self._minMaxUnNormalization(value, -18.0, 18.0)
-
-	def _unNormalizeThrust(self, value):
-		return self._minMaxUnNormalization(value, 0, 100)
-
-
-
-	def _updateLookingVector(self):
-		radians = math.radians(self.worldAngle)
-		self.lookingVector[0] = math.cos(radians)
-		self.lookingVector[1] = math.sin(radians)
-
-	def _updateTargetPos(self, aiAngle):
+		# _updateTargetPos(aiAngle)
 		radians = math.radians((self.worldAngle + aiAngle) % 360)
 		self.targetPos.x = self.pos.x + math.cos(radians) * 200 * 10
 		self.targetPos.y = self.pos.y +  math.sin(radians) * 200 * 10
 
-	def _updateRotation(self, tickIndex):
+		if (tickIndex == 0):
+			self.targetPos.x = self.cpList[self.nextCheckpointId].x
+			self.targetPos.y = self.cpList[self.nextCheckpointId].y
+			# _updateLookingVector()
+			radians = math.radians(self.worldAngle)
+			self.lookingVector[0] = math.cos(radians)
+			self.lookingVector[1] = math.sin(radians)
+
+
+		# _updateRotation(tickIndex)
 		vectorTargetPos = np.array([self.targetPos.x - self.pos.x, self.targetPos.y - self.pos.y])
-		"""
-		print(f"TargetPos: ")
-		print(f"VectorTargetPos: ")
-		print(f"LookingVector: ")
-		"""
 		angleToTargetPos0To360 = getAngleTwoVectors0To360(self.lookingVector, vectorTargetPos)
 		angleToTargetPos0To180 = getAngleTwoVectors0To180(self.lookingVector, vectorTargetPos)
-		if (Pod.debug):
-			with open("debug/" + str(self.ID) + ".debug", "a") as file:
-				file.write(f"Update rotation | TargetPos {self.targetPos.x} {self.targetPos.y}\t VectorTargetPos {vectorTargetPos} \tLookingVector {self.lookingVector} \t Angles {angleToTargetPos0To360} {angleToTargetPos0To180}\n")
+		# if (Pod.debug):
+		# 	with open("debug/" + str(self.ID) + ".debug", "a") as file:
+		# 		file.write("Update rotation | TargetPos {self.targetPos.x} {self.targetPos.y}\t VectorTargetPos {vectorTargetPos} \tLookingVector {self.lookingVector} \t Angles {angleToTargetPos0To360} {angleToTargetPos0To180}\n")
 		if (angleToTargetPos0To360 <= 180):
 			if angleToTargetPos0To180 < 18.0 or tickIndex == 0:
 				self.worldAngle = (self.worldAngle - angleToTargetPos0To180) % 360
@@ -180,22 +146,40 @@ class Pod:
 			else:
 				self.worldAngle = (self.worldAngle + 18.0) % 360
 
-	def _updateVelocityVector(self, thrust):
-		toAdd = self.lookingVector * thrust
-		self.velocityVector += toAdd
+		# _updateLookingVector()
+		radians = math.radians(self.worldAngle)
+		self.lookingVector[0] = math.cos(radians)
+		self.lookingVector[1] = math.sin(radians)
 
-	def _updatePosition(self):
+		# _updateVelocityVector(thrust)
+		self.velocityVector += self.lookingVector * thrust
+
+		# _updatePosition()
 		self.pos.x += self.velocityVector[0]
 		self.pos.y += self.velocityVector[1]
 
-	def _applyFriction(self):
+		# _applyFriction()
 		self.velocityVector *= 0.85
 
-	def _truncateValues(self):
+		# _truncateValues()
+		#truncate velocity vector values
 		self.velocityVector[0] = math.trunc(self.velocityVector[0])
 		self.velocityVector[1] = math.trunc(self.velocityVector[1])
 		self.pos.x = round(self.pos.x)
 		self.pos.y = round(self.pos.y)
+
+		#check collisions with checkpoints
+		self._checkCPCollisions()
+
+		# _checkDeath()
+		if (self.ticksSinceLastCP > 100):
+			self.isAlive = False
+
+		if (self.isAlive):
+			self.ticksAlive += 1
+		return self.isAlive
+
+
 
 	def _checkCPCollisions(self):
 		cpPos = self.cpList[self.nextCheckpointId]
@@ -212,9 +196,6 @@ class Pod:
 			self.didFinish = True
 		self.ticksSinceLastCP += 1
 
-	def _checkDeath(self):
-		if (self.ticksSinceLastCP > 100):
-			self.isAlive = False
 
 
 	"""
